@@ -64,33 +64,47 @@ export class RegisterResultComponent implements OnInit {
   }
 
   public renderChart() {
-    // Reset chart data when re-render chart
+    // Reset chart data when r`e-render chart
     this.chartData = [];
     // Loop the blood indicators
     for (let bIndex = 0; bIndex < this.bloodIndicatorCount; bIndex++) {
       let seriesData: any[] = [];
+      let annotations: any[] = [];
       // Loop the xData by start index and end index
       for (let xIndex = this.startIndex; xIndex < this.endIndex; xIndex++) {
         // Set series data for each blood indictor
         // and for each datetime
         if (this.xData[xIndex]) {
+          const xValue = Number(this.xData[xIndex]);
+          const yValue = !Number.isNaN(Number(this.yData[xIndex][bIndex]))
+            ? this.yData[xIndex][bIndex]
+            : null;
+
           seriesData.push({
-            x: this.xData[xIndex],
-            y: this.yData[xIndex][bIndex],
+            x: xValue,
+            y: yValue,
           });
+
+          if (!yValue) {
+            annotations.push({
+              x: xIndex,
+              y: 'yMax', // always yMax
+            });
+          }
         }
       }
 
       const chartItem = {
         id: `Chart_${bIndex}`,
         seriesData: seriesData,
+        annotations: annotations,
       };
 
       this.chartData.push(chartItem);
     }
   }
 
-  public onLeftClick() {
+  public onSwipeLeft() {
     if (this.startIndex > 0) {
       this.endIndex = this.startIndex;
       this.startIndex -= 5;
@@ -98,7 +112,7 @@ export class RegisterResultComponent implements OnInit {
     }
   }
 
-  public onRightClick() {
+  public onSwipeClick() {
     if (this.endIndex < this.xData.length) {
       this.startIndex = this.endIndex;
       this.endIndex += 5;
